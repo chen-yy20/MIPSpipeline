@@ -1,7 +1,8 @@
 module RegID_EX(
     input reset, input clk, 
     input wire [31:0] PCp4_i,
-    input wire [1:0] ALUSrc_i,
+    input wire ALUSrc1_i,
+    input wire ALUSrc2_i,
     input wire [4:0] ALUCtrl_i,
     input wire Sign_i,
     input wire [1:0] RegDst_i,
@@ -12,7 +13,8 @@ module RegID_EX(
     input wire [1:0] PCSrc_i,
     input LuOp_i,
     output reg [31:0] PCp4_o,
-    output reg [1:0] ALUSrc_o,
+    output reg ALUSrc1_o,
+    output reg ALUSrc2_o,
     output reg [4:0] ALUCtrl_o,
     output reg Sign_0,
     output reg [1:0] RegDst_o,
@@ -26,7 +28,8 @@ module RegID_EX(
     always@(posedge reset or posedge clk) begin
         if (reset) begin
             PCp4_o <= 32'b0; 
-            ALUSrc_o <= 2'b00;
+            ALUSrc1_o <= 0;
+            ALUSrc2_o <= 0;
             ALUCtrl_o <= 0;
             Sign_o <= 0;
             RegDst_o <= 2'b00;
@@ -39,7 +42,8 @@ module RegID_EX(
         end 
         else begin
             PCp4_o < PCp4_i;
-            ALUSrc_o <= ALUSrc_i;
+            ALUSrc1_o <= ALUSrc1_i;
+            ALUSrc2_o <= ALUSrc2_i;
             ALUCtrl_o <= ALUCtrl_i;
             Sign_o <= Sign_i;
             RegDst_o <= RegDst_i;
