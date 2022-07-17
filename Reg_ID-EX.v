@@ -1,6 +1,10 @@
 module RegID_EX(
     input reset, input clk, 
     input wire [31:0] PCp4_i,
+    // calculate signals 
+    input wire [31:0] Op1_i;
+    input wire [31:0] Op2_i;
+    // control signals
     input wire ALUSrc1_i,
     input wire ALUSrc2_i,
     input wire [4:0] ALUCtrl_i,
@@ -12,6 +16,9 @@ module RegID_EX(
     input RegWr_i,
     input wire [1:0] PCSrc_i,
     input LuOp_i,
+    // ======================================
+    output reg [31:0] Op1_o;
+    output reg [31:0] Op2_o;
     output reg [31:0] PCp4_o,
     output reg ALUSrc1_o,
     output reg ALUSrc2_o,
