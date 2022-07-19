@@ -12,89 +12,41 @@ module CPU(Reset, Clk,show_control, led,Seg,Ano);
     output wire [3:0] Ano;
 	// Regs and Wires
 	reg slow_clk;
-	wire [31:0] alures_i, alures_o1, alures_o2;
-    reg  [31:0] PC;
-    wire [31:0] PCnext;
-    wire [31:0] PCp4_origin,PCout;
-	wire [31:0] origin_Ins,Ins,alu_Ins,;
+	wire [31:0] alures_EX, alures_MEM, alures_WB;
+    wire [31:0] PCnext,PCout;
+    wire [31:0] PCp4_origin;
+	wire [31:0] Ins_IF,Ins_ID,Ins_EX,Ins_MEM;
+	// original control signals
 	wire sign,Zero,branch,regwrite,memread,memwrite,alusrc1,alusrc2,extop,luop;
-	wire [1:0] pcsrc, regdst,memtoreg;
+	wire [1:0] PCSrc_ID, regdst, memtoreg;
+
 	wire [4:0] aluc;
-	wire [31:0] op1, op1_o, op2_o1, op2_o2,op1_reg; 
-	wire [31:0] mem_w;
-	wire [31:0] MemData_i,MemData_o;
+	wire [31:0] Op1_ID,Op2_ID,Op1_EX, Op2_EX, Op2_MEM, Op2_reg; // Op2_reg is MUX with forward control 
+	wire [31:0] MemWr_data;
+	wire [31:0] MemData_MEM,MemData_WB;
 	reg [31:0] show;
 
 	wire [31:0] a0,v0,sp,ra;
-	// Imm32_o processed extension based on extop and luop
-	reg signed [31:0] Imm32, Imm32_o;
+	// Imm32_EX processed extension based on extop and luop
+	reg signed [31:0] Imm32_ID, Imm32_EX;
 	reg signed [31:0] alu1;
 	reg signed [31:0] alu2;
-	reg signed [31:0] busW;
+	reg signed [31:0] RFWr_data;
     reg [31:0] cnt;
-
-    Control ControlUnit(.OpCode(pre_Ins[31:26]), .Funct(pre_Ins[5:0]),
-           .PCSrc(pcsrc), .Branch(branch), .RegWrite(regwrite), .RegDst(regdst), 
-           .MemRead(memread), .MemWrite(memwrite), .MemtoReg(memtoreg), 
-           .ALUSrc1(alusrc1), .ALUSrc2(alusrc2), .ExtOp(extop), .LuOp(luop));
-    InstructionMemory IMem(.Address(PC), .Instruction(origin_Ins));
-
-	// realization
-    ALU Alu(.in1(alu1), .in2(alu2), .ALUCtrl(aluc), .Sign(sign), .out(alures_i), .zero(Zero));
-    ALUControl AluC(.Opcode(alu_Ins[31:26]), .Funct(alu_Ins[5:0]), .ALUCtrl(aluc), .Sign(sign));
-    DataMemory DMem(.reset(Reset), .clk(slow_clk), .Address(alures_o1), .Write_data(mem_w), .Read_data(MemData_i), .MemRead(memread), .MemWrite(memwrite));
-    RegisterFile Rfile(.reset(Reset), .clk(slow_clk), .RegWrite(RegWr3), .Read_register1(Ins[25:21]), .Read_register2(Ins[20:16]), .Write_register(rf4), .Write_data(busW), .Read_data1(op1), .Read_data2(op2),.A0(a0),.V0(v0),.SP(sp),.RA(ra));
-	bcd_2_7seg BCD(.s1_data(show[15:12]),.s2_data(show[11:8]),.s3_data(show[7:4]),.s4_data(show[3:0]),.clk(Clk),.dout(Seg),.ano(Ano));
-	ImmProcess ImmP(.ExtOp(extop),.LuiOp(luop),.Immediate(Ins[15:0]),ImmExtOut(Imm32));
-
-	//RegTemp
-	RegTemp regPC(.reset(Reset),.clk(slow_clk),.Data_i(PCnext),.Data_o(PCout));
-
-	// pipeline
-	wire [31:0] PCp40,PCp41,PCp42;
-	wire [4:0] ALUCtrl1;
-	wire [1:0] ALUSrc1_1,ALUSrc2_1,RegDst1,MemtoReg1,PCSrc1;
-	wire [1:0] MemtoReg2,PCSrc2;
-	wire [1:0] MemtoReg3;
-	wire Sign1, MemWr1,Branch1,RegWr1,LuOp1;
-	wire MemWr2,Branch2,RegWr2;
-	wire RegWr3;
-	wire [5:0] rs1,rt1,rd1,rf2,rf3,rf4;
-
-	RegIF_ID IFID(.reset(Reset),.clk(slow_clk),.PCp4_i(PCp4_origin),.PCp4_o(PCp40),.ins_i(origin_Ins),.ins_o(pre_Ins));
-	// RegIF_IF IFIF(.reset(Reset),.clk(slow_clk),.PCp4_i(PCp4),.ExtOp_i(extop),.ALUSrc1_i(alusrc1),.ALUSrc2_i(alusrc2),.ALUCtrl_i(aluc),.Sign_i(sign),.RegDst_i(regdst),.MemWr_i(memwrite),.Branch_i(branch),.MemtoReg_i(memtoreg),.RegWr_i(regwrite),.PCSrc_i(pcsrc),.LuOp_i(luop),.PCp4_o(PCp41),.ExtOp_o(ExtOp1),.ALUSrc1_o(ALUSrc1_1),.ALUSrc2_o(ALUSrc2_1),.ALUCtrl_o(ALUCtrl1),.Sign_o(Sign1),.RegDst_o(RegDst1),.MemWr_o(MemWr1),.Branch_o(Branch1),.MemtoReg_o(MemtoReg1),.RegWr_o(RegWr1),.PCSrc_o(PCSrc1),.LuOp_o(LuOp1));
-	RegID_EX IDEX(.reset(Reset),.clk(slow_clk),.Rs_i(Ins[25:21]),.Rt_i(Ins[20:16]),.Rd_i(Ins[15:11]),.Rs_o(rs1),.Rt_o(rt1),.Rd_o(rd1),.Op1_i(op1),.Op2_i(op2),.Imm_i(Imm32),.Ins_i(Ins),.Op1_o(op1_o),.Op2_o(op2_o1),.Imm_o(Imm32_o),.Ins_o(alu_Ins),.PCp4_i(PCp40),.ALUSrc1_i(alusrc1),.ALUSrc2_i(alusrc2),.ALUCtrl_i(aluc),.Sign_i(sign),.RegDst_i(regdst),.MemWr_i(memwrite),.Branch_i(branch),.MemtoReg_i(memtoreg),.RegWr_i(regwrite),.PCSrc_i(pcsrc),.LuOp_i(luop),.PCp4_o(PCp41),.ALUSrc1_o(ALUSrc1_1),.ALUSrc2_o(ALUSrc2_1),.ALUCtrl_o(ALUCtrl1),.Sign_o(Sign1),.RegDst_o(RegDst1),.MemWr_o(MemWr1),.Branch_o(Branch1),.MemtoReg_o(MemtoReg1),.RegWr_o(RegWr1),.PCSrc_o(PCSrc1),.LuOp_o(LuOp1));
-	// RegID_EX IDEX(.reset(Reset),.clk(slow_clk),.PCp4_i(PCp41),.ALUSrc1_i(ALUSrc1_1),.ALUSrc2_i(ALUSrc2_1),.ALUCtrl_i(ALUCtrl1),.Sign_i(Sign1),.RegDst_i(RegDst1),.MemWr_i(MemWr1),.Branch_i(Branch1),.MemtoReg_i(MemtoReg1),.RegWr_i(RegWr1),.PCSrc_i(PCSrc1),.LuOp_i(LuOp1),.PCp4_o(PCp42),.ALUSrc1_o(),.ALUSrc2_o(),.ALUCtrl_o(),.Sign_o(),.RegDst_o(),.MemWr_o(),.Branch_o(),.MemtoReg_o(),.RegWr_o(),.PCSrc_o(),.LuOp_o());
-	RegEX_MEM EXMEM(.reset(Reset),.clk(slow_clk),.Rf_i(rf2),.Rf_o(rf3),.AluRes_i(alures_i),.AluRes_o(alures_o1),.Op2_i(op2_o1),.Op2_o(op2_o2),.PCp4_i(PCp41),.MemWr_i(MemWr1),.Branch_i(Branch1),.MemtoReg_i(MemtoReg1),.RegWr_i(RegWr1),.PCSrc_i(PCSrc1),.PCp4_o(PCp42),.MemWr_o(MemWr2),.Branch_o(Branch2),.MemtoReg_o(MemtoReg2),.RegWr_o(RegWr2),.PCSrc_o(PCSrc2));
-	RegMEM_WB MEMWB(.reset(Reset),.clk(slow_clk),.Rf_i(rf3),.Rf_o(rf4),.AluRes_i(alures_o1),.Memdata_i(MemData_i),.Memdata_o(MemData_o),.AluRes_o(alures_o2),.MemtoReg_i(MemtoReg2),.RegWr_i(RegWr2),.MemtoReg_o(MemtoReg3),.RegWr_o(RegWr3));
-	//
-	assign PCp4_origin = PCout+4;
-	assign PCnext = (pcsrc==2'b00)?PCp4_origin:
-					(pcsrc==2'b10)?{PCp41[31:28],Ins[25:0],2'b00}: // jump
-					(pcsrc==2'b01&&Branch2&&Zero)?PCp41+(Imm32<<2): // beq
-					op1_o;	// jump regs
-	assign mem_w = ()?MemData_o:op2_o2;
-	assign rf2 = (RegDst1==2'b00)?rd1:
-				 (RegDst1==2'b01)?rt1:
-				 5'b11111;
-
-
-	// TODO: always block should be fixed
-	always @(posedge Reset or posedge slow_clk)
+	
+	// reset
+	always @(posedge Reset)
 	begin
 			if (Reset) 
 			begin
 				PC <= 0;
 				cnt <= 0;
 				slow_clk <= 0;
-			end
-			else 
-			begin
-				PC <= PCnext;
-			end
+			end	
 	end
 
-    always@(posedge Clk)
+	// Devide the frequency
+	always@(posedge Clk)
 	begin
 		 if(cnt == 32'd5000000) begin
            slow_clk <= ~slow_clk;
@@ -103,22 +55,85 @@ module CPU(Reset, Clk,show_control, led,Seg,Ano);
         else cnt <= cnt +1;
     end
 
+	// Units realization
+    Control ControlUnit(.OpCode(Ins_ID[31:26]), .Funct(Ins_ID[5:0]),
+           .PCSrc(PCSrc_ID), .Branch(branch), .RegWrite(regwrite), .RegDst(regdst), 
+           .MemRead(memread), .MemWrite(memwrite), .MemtoReg(memtoreg), 
+           .ALUSrc1(alusrc1), .ALUSrc2(alusrc2), .ExtOp(extop), .LuOp(luop));
+    InstructionMemory IMem(.Address(PC), .Instruction(Ins_IF));
+    ALU Alu(.in1(alu1), .in2(alu2), .ALUCtrl(aluc), .Sign(sign), .out(alures_EX), .zero(Zero));
+    ALUControl AluC(.Opcode(Ins_EX[31:26]), .Funct(Ins_EX[5:0]), .ALUCtrl(aluc), .Sign(sign));
+    DataMemory DMem(.reset(Reset), .clk(slow_clk), .Address(alures_MEM), .Write_data(MemWr_data), .Read_data(MemData_MEM), .MemRead(memread), .MemWrite(memwrite));
+    RegisterFile Rfile(.reset(Reset), .clk(slow_clk), .RegWrite(RegWr_WB), .Read_register1(Ins_ID[25:21]), .Read_register2(Ins_ID[20:16]), .Write_register(rf4), .Write_data(RFWr_data), .Read_data1(Op1_ID), .Read_data2(Op2_ID),.A0(a0),.V0(v0),.SP(sp),.RA(ra));
+	bcd_2_7seg BCD(.s1_data(show[15:12]),.s2_data(show[11:8]),.s3_data(show[7:4]),.s4_data(show[3:0]),.clk(Clk),.dout(Seg),.ano(Ano));
+	ImmProcess ImmP(.ExtOp(extop),.LuiOp(luop),.Immediate(Ins_ID[15:0]),ImmExtOut(Imm32_ID));
 
-	// TODO： hazard control
+	//RegTemp
+	RegTemp regPC(.reset(Reset),.clk(slow_clk),.Data_i(PCnext),.Data_o(PCout));
+
+	// pipeline
+	wire [31:0] PCp4_ID,PCp4_EX;
+	wire [1:0] AluSrc1_EX,AluSrc2_EX,RegDst_EX,MemtoReg_EX,PCSrc_EX;
+	wire [1:0] MemtoReg_MEM,PCSrc_MEM;
+	wire [1:0] MemtoReg_WB;
+	wire Sign_EX, MemWr_EX,Branch_EX,RegWr_EX;
+	wire MemWr_MEM,RegWr_MEM;
+	wire RegWr_WB;
+	wire [5:0] Rs_EX,Rt_EX,Rd_EX,Rfinal_EX,Rfinal_MEM,Rfinal_WB;
+
+	RegIF_ID IFID(.reset(Reset),.clk(slow_clk),.stay(stall1),.null(Null_IFID),.PCp4_i(PCp4_origin),.PCp4_o(PCp4_ID),.ins_i(Ins_IF),.ins_o(Ins_ID));
+	RegID_EX IDEX(.reset(Reset),.clk(slow_clk),.null(Null_IDEX),.Rs_i(Ins_ID[25:21]),.Rt_i(Ins_ID[20:16]),.Rd_i(Ins_ID[15:11]),.Rs_o(Rs_EX),.Rt_o(Rt_EX),.Rd_o(Rd_EX),.Op1_i(Op1_ID),.Op2_i(Op2_ID),.Imm_i(Imm32_ID),.Ins_i(Ins_ID),.Op1_o(Op1_EX),.Op2_o(Op2_EX),.Imm_o(Imm32_EX),.Ins_o(Ins_EX),.PCp4_i(PCp4_ID),.ALUSrc1_i(alusrc1),.ALUSrc2_i(alusrc2),.Sign_i(sign),.RegDst_i(regdst),.MemWr_i(memwrite),.Branch_i(branch),.MemtoReg_i(memtoreg),.RegWr_i(regwrite),.PCSrc_i(PCSrc_ID),.PCp4_o(PCp4_EX),.ALUSrc1_o(AluSrc1_EX),.ALUSrc2_o(AluSrc2_EX),.Sign_o(Sign_EX),.RegDst_o(RegDst_EX),.MemWr_o(MemWr_EX),.Branch_o(Branch_EX),.MemtoReg_o(MemtoReg_EX),.RegWr_o(RegWr_EX),.PCSrc_o(PCSrc_EX));
+	RegEX_MEM EXMEM(.reset(Reset),.clk(slow_clk),.Ins_i(Ins_EX),.Ins_o(Ins_MEM),.Rf_i(Rfinal_EX),.Rf_o(Rfinal_MEM),.AluRes_i(alures_EX),.AluRes_o(alures_MEM),.Op2_i(Op2_EX),.Op2_o(Op2_MEM),.MemWr_i(MemWr_EX),.MemtoReg_i(MemtoReg_EX),.RegWr_i(RegWr_EX),.PCSrc_i(PCSrc_EX),.MemWr_o(MemWr_MEM),.MemtoReg_o(MemtoReg_MEM),.RegWr_o(RegWr_MEM),.PCSrc_o(PCSrc_MEM));
+	RegMEM_WB MEMWB(.reset(Reset),.clk(slow_clk),.Rf_i(Rfinal_MEM),.Rf_o(Rfinal_WB),.AluRes_i(alures_MEM),.Memdata_i(MemData_MEM),.Memdata_o(MemData_WB),.AluRes_o(alures_WB),.MemtoReg_i(MemtoReg_MEM),.RegWr_i(RegWr_MEM),.MemtoReg_o(MemtoReg_WB),.RegWr_o(RegWr_WB));
+
+	// hazard control
+	wire [1:0] forward1_1,forward1_2;
+	wire forward2;
+	wire stall1;
+	wire Null_IFID, Null_IDEX;
+	assign stall1 = ((Ins_ID[25:21]==Rt_EX||Ins_ID[20:16]==Rt_EX)&&(Ins_EX[31:26]==6'h23))?1:0;
+	assign forward1_1 = (Rs_EX==Rfinal_MEM)?2'b01:
+						(Rs_EX==Rfinal_WB)?2'b10:
+						0;
+	assign forward1_2 = (Rt_EX==Rfinal_MEM)?2'b01:
+						(Rt_EX==Rfinal_WB)?2'b10:
+						0;
+	assign Op2_reg = (forward1_2==2'b01)?alures_MEM:
+					 (forward1_2==2'b10)?RFWr_data:
+					 Op2_EX;
+	assign forward2 = (MemWr_MEM==1&&(Rfinal_MEM==Rfinal_WB))?1:0;
+	assign Null_IFID = ((Branch_EX&&Zero)||PCSrc_ID==2'b10||PCSrc_ID==2'b11)?1:0;  // jump or beq
+	assign Null_IDEX = ((Branch_EX&&Zero)||stall1)?1:0;
+
+	// pc update
+	assign PCp4_origin = PCout+4;
+	assign PCnext = (Branch_EX&&Zero)?PCp4_EX+(Imm32_ID<<2): // beq EX priority
+					(PCSrc_ID==2'b10)?{PCp4_ID[31:28],Ins_ID[25:0],2'b00}: // jump ID
+					(PCSrc_ID==2'b11)?Op1_ID: // jump reg ID			
+					PCp4_origin;	// PC+4
+	// branch & jump 
+
+	assign MemWr_data = (forward2==1)?RFWr_data:Op2_MEM;
+	assign Rfinal_EX = (RegDst_EX==2'b00)?Rd_EX:
+				 (RegDst_EX==2'b01)?Rt_EX:
+				 5'b11111;
+
 	always @(*)
 	begin
-		op1_reg = ()?:op1_o; // TODO： hazard unit
-        alu1 = (alusrc1==1)?alu_Ins[10:6]:op1_reg; // Ins or Reg
-        alu2 = (alusrc2==1)?Imm32_o:op2_o1;
-        busW = 	(MemtoReg2==2'b00)?alures_o2:
-				MemData_o; //(memtoreg==2'b01)?
+		RFWr_data = (MemtoReg_MEM==2'b00)?alures_WB:
+					MemData_WB;
+        alu1 = 	(forward1_1==2'b01)?alures_MEM:
+				(forward1_1==2'b10)?RFWr_data: 
+				((AluSrc1_EX==1)?Ins_EX[10:6]:Op1_EX); // no forward Ins or Reg
+        alu2 = (AluSrc2_EX==1)?Imm32_EX:Op2_reg; // Imm or reg (have been forwarded)
+       
 		// bcd
 		//show = 16'h1234;
 		show = (show_control==2'b00)?a0:
 		(show_control==2'b01)?v0:
 		(show_control==2'b10)?sp:
 		ra;
-		led = PC[7:0];
+		led = PCout[7:0];
 	end
 	
 
