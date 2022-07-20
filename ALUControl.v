@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module ALUControl(Opcode, Funct, ALUCtrl, Sign);
 input [5:0] Opcode;
 input [5:0] Funct;

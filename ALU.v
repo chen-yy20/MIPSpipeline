@@ -1,4 +1,4 @@
-
+`timescale 1ns / 1ps
 module ALU(in1, in2, ALUCtrl, Sign, out, zero);
 input signed [31:0] in1;
 input signed [31:0] in2;

@@ -1,9 +1,10 @@
+`timescale 1ns / 1ps
 module RegIF_ID(
     input reset, input clk,input stay,input null,
     input wire [31:0] PCp4_i, 
-    input wire [31:0] ins_i;
-    output reg [31:0] PCp4_o;
-    output reg [31:0] ins_o;
+    input wire [31:0] ins_i,
+    output reg [31:0] PCp4_o,
+    output reg [31:0] ins_o
     );
     
     always@(posedge reset or posedge clk) begin

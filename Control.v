@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 module Control(OpCode, Funct,
 	PCSrc, Branch, RegWrite, RegDst, 
 	MemRead, MemWrite, MemtoReg, 
@@ -20,7 +21,7 @@ module Control(OpCode, Funct,
     assign Branch = (OpCode==6'h04)?1:0;
     assign RegWrite = (OpCode==6'h04||OpCode==6'h02||(OpCode ==0&&Funct == 6'h08)||(OpCode ==0&&Funct == 6'h09)||OpCode==6'h2b)?0:1;
     // 01 I-type write Rt
-    assign RegDst = (OpCode==6'h03||(OpCode ==0&&Funct == 6'h09))?2'b10:(OpCode==6'h23||OpCode==6'h0f||OpCode==6'h08||OpCode==6'h09||OpCode==6'h0c||OpCode==6'h0a||OpCode==6'h0b||OpCode==6'h04)?2'b01:2'b00;
+    assign RegDst = (OpCode==6'h03||(OpCode ==0&&Funct == 6'h09))?2'b10:(OpCode==6'h23||OpCode == 6'h2b||OpCode==6'h0f||OpCode==6'h08||OpCode==6'h09||OpCode==6'h0c||OpCode==6'h0a||OpCode==6'h0b||OpCode==6'h04)?2'b01:2'b00;
     assign MemRead = (OpCode==6'h23)?1:0;
     assign MemWrite = (OpCode==6'h2b)?1:0;
     // jalr
