@@ -133,6 +133,26 @@ begin
     ALUCtrl = 5'd1;
     Sign = 1;
 end
+6'h05:
+begin
+    ALUCtrl = 5'd11;
+    Sign = 1;
+end
+6'h30:
+begin
+    ALUCtrl = 5'd12;
+    Sign = 1;
+end
+6'h21:
+begin
+    ALUCtrl = 5'd13;
+    Sign = 1;
+end
+6'h38:
+begin
+    ALUCtrl = 5'd14;
+    Sign = 1;
+end
 6'h02:
 begin
     ALUCtrl = 5'd10;

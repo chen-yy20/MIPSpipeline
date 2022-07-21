@@ -8,6 +8,8 @@ module RegID_EX(
     input wire [31:0] Imm_i,
     input wire [31:0] Ins_i,
     // control signals
+    input wire ex_wr_i,
+    input wire [1:0] ex_ano_i,
     input wire  ALUSrc1_i,
     input wire  ALUSrc2_i,
     input wire Sign_i,
@@ -28,6 +30,8 @@ module RegID_EX(
     output reg [31:0] Imm_o,
     output reg [31:0] Ins_o,
     output reg [31:0] PCp4_o,
+    output reg ex_wr_o,
+    output reg [1:0] ex_ano_o,
     output reg ALUSrc1_o,
     output reg ALUSrc2_o,
     output reg Sign_o,
@@ -50,6 +54,8 @@ module RegID_EX(
             Imm_o <= 0;
             Ins_o <= 0;
             PCp4_o <= 32'b0; 
+            ex_wr_o <= 0;
+            ex_ano_o <= 0;
             ALUSrc1_o <= 0;
             ALUSrc2_o <= 0;
             Sign_o <= 0;
@@ -70,6 +76,8 @@ module RegID_EX(
             Imm_o <= Imm_i;
             Ins_o <= Ins_i;
             PCp4_o <= PCp4_i;
+            ex_wr_o <= ex_wr_i;
+            ex_ano_o <= ex_ano_i;
             ALUSrc1_o <= ALUSrc1_i;
             ALUSrc2_o <= ALUSrc2_i;
             Sign_o <= Sign_i;

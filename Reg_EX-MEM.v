@@ -6,6 +6,8 @@ module RegEX_MEM(
     input wire [31:0] Op2_i,
     input wire [31:0] PCp4_i,
     // control
+    input wire ex_wr_i,
+    input wire [1:0] ex_ano_i,
     input MemWr_i, 
     input MemRd_i,
     input wire [1:0] MemtoReg_i,
@@ -18,6 +20,8 @@ module RegEX_MEM(
     output reg [31:0] AluRes_o,
     output reg [31:0] Op2_o,
     output reg [31:0] PC_o,
+    output reg ex_wr_o,
+    output reg [1:0] ex_ano_o,
     output reg MemWr_o, 
     output reg MemRd_o,
     output reg [1:0] MemtoReg_o,
@@ -30,6 +34,8 @@ module RegEX_MEM(
     always@(posedge reset or posedge clk) begin
         if (reset) begin
             AluRes_o <= 0;
+            ex_wr_o <= 0;
+            ex_ano_o <= 0;
             MemWr_o <= 0;
             MemRd_o <= 0;
             PC_o <= 0;
@@ -41,10 +47,12 @@ module RegEX_MEM(
             Op2_o <= 0;
         end 
         else begin
-            AluRes_o <= AluRes_i;
+            AluRes_o <= (ex_wr_i==1)?32'h40000010:AluRes_i;
             MemWr_o <= MemWr_i;
             MemRd_o <= MemRd_i;
             PC_o <= PCp4_i -4;
+            ex_wr_o <= ex_wr_i;
+            ex_ano_o <= ex_ano_i;
             MemtoReg_o <= MemtoReg_i;
             RegWr_o <= RegWr_i;
             PCSrc_o <= PCSrc_i;

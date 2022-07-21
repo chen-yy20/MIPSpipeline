@@ -85,7 +85,31 @@ begin
         out = 0;
         zero = 0;
     end
-
+    // there must be some problem! 
+    // bne
+    5'd11:
+    begin
+        out = in1-in2;
+        zero = (out ==0)?0:1;
+    end
+    // blez
+    5'd12:
+    begin
+        out = in1;
+        zero = (out>0)?0:1;
+    end
+    // bltz
+    5'd13:
+    begin
+        out = in1;
+        zero = (out<0)?1:0;
+    end
+    // bgtz
+    5'd14:
+    begin
+        out = in1;
+        zero = (out>0)?1:0;
+    end
     default:
     begin
         out = 0;
