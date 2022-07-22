@@ -16,6 +16,7 @@ module RegID_EX(
     input wire [1:0] RegDst_i,
     input MemWr_i, 
     input MemRd_i,
+    input ByteRd_i,
     input Branch_i,
     input wire [1:0] MemtoReg_i,
     input RegWr_i,
@@ -38,6 +39,7 @@ module RegID_EX(
     output reg [1:0] RegDst_o,
     output reg MemWr_o, 
     output reg MemRd_o,
+    output reg ByteRd_o,
     output reg Branch_o,
     output reg [1:0] MemtoReg_o,
     output reg RegWr_o,
@@ -62,6 +64,7 @@ module RegID_EX(
             RegDst_o <= 2'b00;
             MemWr_o <= 0;
             MemRd_o <= 0;
+            ByteRd_o <= 0;
             Branch_o <= 0;
             MemtoReg_o <= 2'b00;
             RegWr_o <= 0;
@@ -84,6 +87,7 @@ module RegID_EX(
             RegDst_o <= RegDst_i;
             MemWr_o <= MemWr_i;
             MemRd_o <= MemRd_i;
+            ByteRd_o <= ByteRd_i;
             Branch_o <= Branch_i;
             MemtoReg_o <= MemtoReg_i;
             RegWr_o <= RegWr_i;

@@ -8,6 +8,11 @@ output reg Sign;
 always@(*)
 begin
 casez(Opcode)
+6'h20:
+begin
+    ALUCtrl = 5'd0;
+    Sign =1;
+end
 6'h23:
 begin
     ALUCtrl = 5'd0;
@@ -158,7 +163,7 @@ begin
     ALUCtrl = 5'd10;
     Sign = 1;
 end
-4'h03:
+6'h03:
 begin
     ALUCtrl = 5'd10;
     Sign = 1;

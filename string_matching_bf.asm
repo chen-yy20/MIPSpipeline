@@ -68,12 +68,13 @@ syscall
 
 #call brute_force
 move $a0, $s0
-# 00102021
+# 00102021 s0为字符串长度 initial
 la $a1, str
-# a1 为字符串首字
-move $a2, $s1
-# 00113021
+# a1 为字符串首字 initial
+move $a2, $s1 
+# 00113021 s1为模式串长度 initial
 la $a3, pattern
+# a3 为模式串首地址
 jal brute_force
 # jump 再说
 #printf
@@ -106,7 +107,7 @@ li $t2, 0 # t2 => j
 # 240a0000
 inner_loop:
 slt $t3, $t2, $s1
-# 01C9582A
+# 0151582A
 beqz $t3, inner_loop_break
 # 11600008
 add $t3, $t1, $t2
