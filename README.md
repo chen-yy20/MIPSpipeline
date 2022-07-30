@@ -1,17 +1,11 @@
-# MIPS Pipeline
-
-数字逻辑与处理器 小学期 大作业
+# MIPSpipeline
+verilog project coming from hw of THUEE 数字逻辑与处理器
 
 * src 
-
-  存放verilog、xdc、assemble源代码
-
+  存放verilog/constraint/assemble 等源代码
 * helper
-
-  coding 过程中参考的资料
-
+  一些在coding过程中参考过的资料
 * report
-
-  实验报告 word&pdf 版本
-
-> 最后后仿真好像有点问题，但我完全看不懂后仿真。。等回校问一下老师吧。（苦恼
+  实验报告doc&pdf 版本
+  
+  最后程序的后仿真其实有点问题，但我看不懂后仿真，等回校再问一下老师吧。。。（苦恼
