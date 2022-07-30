@@ -65,7 +65,7 @@ module CPU(Reset, Clk,show_control, led,Seg,Ano);
                 cnt <= 0;
                 slow_clk <= 0;
             end    
-		 else if(cnt == 32'd500000) begin // should be 5000000
+		 else if(cnt == 32'd1) begin // should be 5000000
            slow_clk <= ~slow_clk;
            cnt <= 0;
         end

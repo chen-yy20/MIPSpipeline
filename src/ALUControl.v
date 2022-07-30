@@ -143,17 +143,17 @@ begin
     ALUCtrl = 5'd11;
     Sign = 1;
 end
-6'h30:
+6'h06:
 begin
     ALUCtrl = 5'd12;
     Sign = 1;
 end
-6'h21:
+6'h01:
 begin
     ALUCtrl = 5'd13;
     Sign = 1;
 end
-6'h38:
+6'h07:
 begin
     ALUCtrl = 5'd14;
     Sign = 1;
